@@ -12,7 +12,16 @@ import (
 
 func UpdateIot(w http.ResponseWriter, r *http.Request) {
 	deviceId := pat.Param(r, "deviceId")
-	db, err := sql.Open("sqlite3", "iot.db")
+
+	db, _ := sql.Open("sqlite3", "iot.db")
+
+	device, err := models.GetDevice(db, deviceId)
+	if device == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Invalid Device ID"))
+		return
+	}
+
 	previousDp, _ := models.GetDataPoints(db, &deviceId)
 	dp := new(models.DataPoints)
 	body := make([]byte, r.ContentLength)
@@ -43,7 +52,7 @@ func UpdateIot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updated, _ := json.Marshal(dataPointsResult)
-	w.Write(updated)
+	_, _ = w.Write(updated)
 
 	if previousDp["waterLevelLow"]["value"] == false && (*dp)["waterLevelLow"]["value"] == true {
 		log.Println("Triggering email...")

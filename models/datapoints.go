@@ -14,6 +14,14 @@ type DataPointDescriptor struct {
 	_type    string
 }
 
+type Device struct {
+	id          string
+	description string
+	secret_key  string
+	created_at  string
+	update_at   string
+}
+
 func (config *DataPoints) UpdateConfig(db *sql.DB, deviceId string) error {
 	for key, elem := range *config {
 		rslt, err := db.Exec("update config set value = ? where attr = ? and device_id = ?", elem["value"], key, deviceId)
@@ -32,6 +40,23 @@ func (config *DataPoints) UpdateConfig(db *sql.DB, deviceId string) error {
 	return nil
 }
 
+func GetDevice(db *sql.DB, deviceId string) (*Device, error) {
+	rslt, err := db.Query("select id, description, create_at, updated_at from device where device.id = ?", deviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	var device *Device
+	for rslt.Next() {
+		device = new(Device)
+		err = rslt.Scan(&device.id, &device.description, &device.created_at, &device.update_at)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return device, nil
+}
 func GetDataPoints(db *sql.DB, deviceId *string) (DataPoints, error) {
 	rslt, err := db.Query("select device_id, attr, value, type from device, config where device.id = config.device_id and device.id = ?", *deviceId)
 	if err != nil {
