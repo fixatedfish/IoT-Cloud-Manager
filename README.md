@@ -1,8 +1,8 @@
-###IoT Cloud Manager
+## IoT Cloud Manager
 
 A very basic (and unfinished) handler for status updates from IoT devices
 
-#Example POST for update</h3>
+### Example POST for update</h3>
 ```
 {"moistureLevel":
     {
